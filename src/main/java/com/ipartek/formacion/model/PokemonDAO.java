@@ -13,6 +13,7 @@ import org.apache.log4j.Logger;
 import com.ipartek.formacion.model.pojo.Habilidad;
 import com.ipartek.formacion.model.pojo.Pokemon;
 
+
 public class PokemonDAO implements IDAO<Pokemon>{
 	
 	private final static Logger LOG = Logger.getLogger(PokemonDAO.class);
@@ -33,6 +34,8 @@ public class PokemonDAO implements IDAO<Pokemon>{
 														" FROM pokemon p, pokemon_has_habilidades ph, habilidad h " + 
 														" WHERE p.id = ph.id_pokemon AND ph.id_habilidad = h.id AND p.nombre LIKE ? " + 
 														" ORDER BY p.id DESC LIMIT 500;";
+	
+	private static final String SQL_DELETE = "DELETE FROM pokemon WHERE id = ?;";
 	
 	
 	private PokemonDAO() {
@@ -163,10 +166,31 @@ public class PokemonDAO implements IDAO<Pokemon>{
 
 	@Override
 	public Pokemon delete(int id) throws Exception {
-		// TODO Auto-generated method stub
-		return null;
+
+		Pokemon pBorrar = null;
+		
+		try (Connection con = ConnectionManager.getConnection(); PreparedStatement pst = con.prepareStatement(SQL_DELETE);) {
+
+			pst.setInt(1, id);
+			LOG.debug(pst);
+			
+			//obtenemos el id antes de elimianrlo:
+			pBorrar = this.getById(id);
+
+			//eliminamos el prodcuto:
+			int affetedRows = pst.executeUpdate();
+			if (affetedRows != 1) {
+				pBorrar = null; //eliminamos
+				throw new Exception("No se puede borrar el pokemon con id " + id);
+			}
+		} //si salta alguna excepción, la recoge PokemonController
+		
+		return pBorrar;
+		
 	}
 
+	
+	
 	@Override
 	public Pokemon update(int id, Pokemon pojo) throws Exception {
 		// TODO Auto-generated method stub

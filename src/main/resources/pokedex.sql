@@ -66,10 +66,10 @@ CREATE TABLE IF NOT EXISTS `pokemon_has_habilidades` (
   PRIMARY KEY (`id_pokemon`,`id_habilidad`),
   KEY `FK_habilidad` (`id_habilidad`),
   CONSTRAINT `FK_habilidad` FOREIGN KEY (`id_habilidad`) REFERENCES `habilidad` (`id`),
-  CONSTRAINT `FK_pokemon` FOREIGN KEY (`id_pokemon`) REFERENCES `pokemon` (`id`)
+  CONSTRAINT `FK_pokemon` FOREIGN KEY (`id_pokemon`) REFERENCES `pokemon` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
--- Volcando datos para la tabla pokedex.pokemon_has_habilidades: ~9 rows (aproximadamente)
+-- Volcando datos para la tabla pokedex.pokemon_has_habilidades: ~10 rows (aproximadamente)
 DELETE FROM `pokemon_has_habilidades`;
 /*!40000 ALTER TABLE `pokemon_has_habilidades` DISABLE KEYS */;
 INSERT INTO `pokemon_has_habilidades` (`id_pokemon`, `id_habilidad`) VALUES

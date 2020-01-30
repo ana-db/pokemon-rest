@@ -18,6 +18,7 @@ import com.ipartek.formacion.model.PokemonDAO;
 import com.ipartek.formacion.model.pojo.Pokemon;
 
 
+
 /**
  * Servlet implementation class PokemonController
  */
@@ -185,7 +186,28 @@ public class PokemonController extends HttpServlet {
 	 * @see HttpServlet#doDelete(HttpServletRequest, HttpServletResponse)
 	 */
 	protected void doDelete(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-		// TODO Auto-generated method stub
+		
+		LOG.debug("DELETE eliminar recurso");
+		
+		//aquí cogemos cogemos el índice del pokemon de la url con la función obtenerId() (tenemos la llamada en service): 
+			
+		if ( id != -1 ) {	//significa que el producto sí existe en la bd. Lo eliminamos por su id
+				
+			try {
+				
+				Pokemon pEliminar = dao.delete(id);
+				responseBody = pEliminar;
+				
+				//response status code:
+				statusCode = HttpServletResponse.SC_OK;	//200, ok
+				
+			} catch (Exception e) {
+
+				//response status code:
+				statusCode = HttpServletResponse.SC_NOT_FOUND;	//404, no se encuentra el recurso solicitado
+			}
+
+		}		
 	}
 	
 	
