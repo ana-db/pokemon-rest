@@ -1,29 +1,31 @@
 package com.ipartek.formacion.model.pojo;
 
+import java.util.ArrayList;
 import java.util.List;
 
 public class Pokemon {
 	
+	//atributos:
 	private int id;
 	private String nombre;
-	//private List<Habilidad> habilidades;
-	private Habilidad habilidad;
+	private List<Habilidad> habilidades;
+	//private Habilidad habilidad;
 	
 	//constructores:
 	public Pokemon() {
 		super();
 		this.id = 0;
 		this.nombre = "";
-	//	this.habilidades = new List<Habilidad>();
-		this.habilidad = new Habilidad();
+		this.habilidades = new ArrayList<Habilidad>();
+		//	this.habilidad = new Habilidad();
 	}
 	
-	public Pokemon(int id, String nombre, Habilidad habilidad) { //, List<Habilidad> habilidades) {
+	public Pokemon(int id, String nombre, List<Habilidad> habilidades) { //Habilidad habilidad) { 
 		this();
 		this.id = id;
 		this.nombre = nombre;
-	//	this.habilidades = habilidades;
-		this.habilidad = habilidad;
+		this.habilidades = habilidades;
+		//	this.habilidad = habilidad;
 	}
 
 	//getters y setters:
@@ -42,7 +44,7 @@ public class Pokemon {
 	public void setNombre(String nombre) {
 		this.nombre = nombre;
 	}
-/*
+
 	public List<Habilidad> getHabilidades() {
 		return habilidades;
 	}
@@ -55,17 +57,10 @@ public class Pokemon {
 	public String toString() {
 		return "Pokemon [id=" + id + ", nombre=" + nombre + ", habilidades=" + habilidades + "]";
 	}
-*/
 
 
-/*	
- 	@Override
-	public String toString() {
-		return "Pokemon [id=" + id + ", nombre=" + nombre + "]";
-	}
-*/	
-	
-	
+
+/*		
 	public Habilidad getHabilidad() {
 		return habilidad;
 	}
@@ -78,6 +73,6 @@ public class Pokemon {
 	public String toString() {
 		return "Pokemon [id=" + id + ", nombre=" + nombre + ", habilidad=" + habilidad + "]";
 	}
-		
+*/		
 	
 }

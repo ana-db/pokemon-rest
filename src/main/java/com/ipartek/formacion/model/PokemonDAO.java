@@ -36,11 +36,13 @@ public class PokemonDAO implements IDAO<Pokemon>{
 		
 		//String sql = "SELECT id 'id_pokemon', nombre 'nombre_pokemon' FROM pokemon ORDER BY id DESC LIMIT 500";
 		String sql = "SELECT p.id 'id_pokemon', p.nombre 'nombre_pokemon', h.id 'id_habilidad', h.nombre 'nombre_habilidad' " + 
-					" FROM pokemon p, habilidad h, pokemon_has_habilidades ph " + 
+					" FROM pokemon p, pokemon_has_habilidades ph, habilidad h " + 
 					" WHERE p.id = ph.id_pokemon AND ph.id_habilidad = h.id " + 
 					" ORDER BY p.id DESC LIMIT 500;";
 
-		ArrayList<Pokemon> registros = new ArrayList<Pokemon>();
+		//ArrayList<Pokemon> registros = new ArrayList<Pokemon>();
+		
+		HashMap<Integer, Pokemon> pokemonHM = new HashMap<Integer, Pokemon>();
 		
 		try (Connection con = ConnectionManager.getConnection();
 				PreparedStatement pst = con.prepareStatement(sql);
@@ -48,23 +50,34 @@ public class PokemonDAO implements IDAO<Pokemon>{
 						
 			while( rs.next() ) {
 				
-				registros.add(mapper(rs));
-				/*
-				//hashmap:
-				HashMap<Integer, Pokemon> pokemonHM = new HashMap<Integer, Pokemon>();
-				if(pokemonHM.get("id_pokemon") == rs) {
-					
-				}else {
-					pokemonHM.put(id_pokemon, rs);
+				int idPokemon = rs.getInt("id_pokemon");
+				
+				Pokemon p = pokemonHM.get(idPokemon);
+				
+				if(p == null) {
+					p = new Pokemon();
+					p.setId(idPokemon);
+					p.setNombre(rs.getString("nombre_pokemon"));
 				}
-				*/
+				
+				Habilidad h = new Habilidad();
+				h.setId(rs.getInt("id_habilidad"));
+				h.setNombre(rs.getString("nombre_habilidad"));
+				
+				p.getHabilidades().add(h); 
+				
+				pokemonHM.put(idPokemon, p);
+				
+				//registros.add(mapper(rs));
+				
 			}
 
 		} catch (Exception e) {
 			LOG.error(e); 
 		}
 		
-		return registros;
+		//return registros;
+		return new ArrayList<Pokemon>(pokemonHM.values());
 	}
 
 	
@@ -92,15 +105,14 @@ public class PokemonDAO implements IDAO<Pokemon>{
 		return null;
 	}
 	
-	
-	
+		
 	/**
 	 * Utilidad para mapear un ResultSet a un pojo o a un Pokemon
-	 * @param rs
-	 * @return
-	 * @throws SQLException
+	 * @param rs : result set
+	 * @return p : devuelve el objeto Pokemon con los atributos del rs
+	 * @throws SQLException : si no puede asignar un valor a algún atributo del objeto
 	 */
-	private Pokemon mapper(ResultSet rs) throws SQLException{
+	/*	private Pokemon mapper(ResultSet rs) throws SQLException{
 		
 		Pokemon p = new Pokemon();
 		p.setId(rs.getInt("id_pokemon"));
@@ -111,16 +123,10 @@ public class PokemonDAO implements IDAO<Pokemon>{
 		h.setNombre(rs.getString("nombre_habilidad"));
 		p.setHabilidad(h);
 		
-		/*		
-		Habilidad h = new Habilidad();
-		ArrayList<Habilidad> habilidades = (ArrayList<Habilidad>) new  ;
-		h.setId(rs.getInt("id_habilidad"));
-		h.setNombre(rs.getString("nombre_habilidad"));
-		p.setHabilidades(h);
-		*/
 		return p;
+		
 	}
 
-	
+	*/	
 
 }

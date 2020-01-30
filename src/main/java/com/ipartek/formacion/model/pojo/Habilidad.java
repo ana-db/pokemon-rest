@@ -2,7 +2,7 @@ package com.ipartek.formacion.model.pojo;
 
 public class Habilidad {
 	
-	//variables:
+	//atributos:
 	private int id;
 	private String nombre;
 	
