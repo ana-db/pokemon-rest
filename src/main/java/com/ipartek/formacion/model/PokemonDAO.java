@@ -19,6 +19,17 @@ public class PokemonDAO implements IDAO<Pokemon>{
 	
 	private static PokemonDAO INSTANCE;
 	
+	private static final String SQL_GET_ALL = "SELECT p.id 'id_pokemon', p.nombre 'nombre_pokemon', h.id 'id_habilidad', h.nombre 'nombre_habilidad' " + 
+												" FROM pokemon p, pokemon_has_habilidades ph, habilidad h " + 
+												" WHERE p.id = ph.id_pokemon AND ph.id_habilidad = h.id " + 
+												" ORDER BY p.id DESC LIMIT 500;";
+	
+	private static final String SQL_GET_BY_ID = "SELECT p.id 'id_pokemon', p.nombre 'nombre_pokemon', h.id 'id_habilidad', h.nombre 'nombre_habilidad' " + 
+												" FROM pokemon p, pokemon_has_habilidades ph, habilidad h " + 
+												" WHERE p.id = ph.id_pokemon AND ph.id_habilidad = h.id AND p.id= ?" + 
+												" ORDER BY p.id DESC LIMIT 500;";
+	
+	
 	private PokemonDAO() {
 		super();
 	}
@@ -35,23 +46,23 @@ public class PokemonDAO implements IDAO<Pokemon>{
 	public List<Pokemon> getAll() {
 		
 		//String sql = "SELECT id 'id_pokemon', nombre 'nombre_pokemon' FROM pokemon ORDER BY id DESC LIMIT 500";
-		String sql = "SELECT p.id 'id_pokemon', p.nombre 'nombre_pokemon', h.id 'id_habilidad', h.nombre 'nombre_habilidad' " + 
+		/* String sql = "SELECT p.id 'id_pokemon', p.nombre 'nombre_pokemon', h.id 'id_habilidad', h.nombre 'nombre_habilidad' " + 
 					" FROM pokemon p, pokemon_has_habilidades ph, habilidad h " + 
 					" WHERE p.id = ph.id_pokemon AND ph.id_habilidad = h.id " + 
-					" ORDER BY p.id DESC LIMIT 500;";
+					" ORDER BY p.id DESC LIMIT 500;"; */
 
 		//ArrayList<Pokemon> registros = new ArrayList<Pokemon>();
 		
 		HashMap<Integer, Pokemon> pokemonHM = new HashMap<Integer, Pokemon>();
 		
 		try (Connection con = ConnectionManager.getConnection();
-				PreparedStatement pst = con.prepareStatement(sql);
+				PreparedStatement pst = con.prepareStatement(SQL_GET_ALL);
 				ResultSet rs = pst.executeQuery() ) {
 						
 			while( rs.next() ) {
 				
 				int idPokemon = rs.getInt("id_pokemon");
-				
+/*				
 				Pokemon p = pokemonHM.get(idPokemon);
 				
 				if(p == null) {
@@ -67,7 +78,8 @@ public class PokemonDAO implements IDAO<Pokemon>{
 				p.getHabilidades().add(h); 
 				
 				pokemonHM.put(idPokemon, p);
-				
+*/				
+				pokemonHM.put(idPokemon, mapper(rs, idPokemon, pokemonHM));
 				//registros.add(mapper(rs));
 				
 			}
@@ -76,15 +88,40 @@ public class PokemonDAO implements IDAO<Pokemon>{
 			LOG.error(e); 
 		}
 		
-		//return registros;
 		return new ArrayList<Pokemon>(pokemonHM.values());
-	}
-
+	}	
 	
+
 	@Override
 	public Pokemon getById(int id) {
-		// TODO Auto-generated method stub
-		return null;
+		
+		Pokemon p = null;
+		
+		HashMap<Integer, Pokemon> pokemonHM = new HashMap<Integer, Pokemon>(); 
+		
+		try (Connection con = ConnectionManager.getConnection();
+				PreparedStatement pst = con.prepareStatement(SQL_GET_BY_ID);
+				) {
+						
+			//sustituimos parámetros en la SQL, en este caso 1º ? por id:
+			pst.setInt(1, id);
+			LOG.debug(pst);
+			
+			p = pokemonHM.get(id);
+
+			//ejecutamos la consulta:
+			try (ResultSet rs = pst.executeQuery()) {
+				while(rs.next()) {
+
+					p = mapper(rs, id, pokemonHM);
+				}
+			}
+
+		} catch (Exception e) {
+			LOG.error(e); 
+		}
+		
+		return p;
 	}
 
 	@Override
@@ -106,27 +143,25 @@ public class PokemonDAO implements IDAO<Pokemon>{
 	}
 	
 		
-	/**
-	 * Utilidad para mapear un ResultSet a un pojo o a un Pokemon
-	 * @param rs : result set
-	 * @return p : devuelve el objeto Pokemon con los atributos del rs
-	 * @throws SQLException : si no puede asignar un valor a algún atributo del objeto
-	 */
-	/*	private Pokemon mapper(ResultSet rs) throws SQLException{
+	private Pokemon mapper(ResultSet rs, int idPokemon, HashMap<Integer, Pokemon> pokemonHM) throws SQLException {
+
+		Pokemon p = pokemonHM.get(idPokemon);
 		
-		Pokemon p = new Pokemon();
-		p.setId(rs.getInt("id_pokemon"));
-		p.setNombre(rs.getString("nombre_pokemon"));
+		if(p == null) {
+			p = new Pokemon();
+			p.setId(idPokemon);
+			p.setNombre(rs.getString("nombre_pokemon"));
+		}
 		
 		Habilidad h = new Habilidad();
 		h.setId(rs.getInt("id_habilidad"));
 		h.setNombre(rs.getString("nombre_habilidad"));
-		p.setHabilidad(h);
+		
+		p.getHabilidades().add(h); 
+		
+		pokemonHM.put(idPokemon, p);
 		
 		return p;
-		
 	}
-
-	*/	
 
 }
