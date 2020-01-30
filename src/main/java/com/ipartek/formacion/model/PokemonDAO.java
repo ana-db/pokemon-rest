@@ -1,9 +1,11 @@
 package com.ipartek.formacion.model;
 
+import java.sql.Array;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -36,6 +38,8 @@ public class PokemonDAO implements IDAO<Pokemon>{
 														" ORDER BY p.id DESC LIMIT 500;";
 	
 	private static final String SQL_DELETE = "DELETE FROM pokemon WHERE id = ?;";
+	
+	private static final String SQL_INSERT = "INSERT INTO `pokemon` (`nombre`) VALUES (?);";
 	
 	
 	private PokemonDAO() {
@@ -197,10 +201,29 @@ public class PokemonDAO implements IDAO<Pokemon>{
 		return null;
 	}
 
+	
 	@Override
 	public Pokemon create(Pokemon pojo) throws Exception {
-		// TODO Auto-generated method stub
-		return null;
+
+		//establecemos conexión:
+		try (Connection con = ConnectionManager.getConnection(); PreparedStatement pst = con.prepareStatement(SQL_INSERT, Statement.RETURN_GENERATED_KEYS)) {
+			
+			pst.setString(1, pojo.getNombre()); //1er interrogante con el nombre del registro que se quiere modificar; en ese caso, nombre
+			pst.setArray(2, (Array) pojo.getHabilidades().get(1) ); //añadimos habilidad
+			LOG.debug(pst);
+			
+			int affectedRows = pst.executeUpdate();
+			if (affectedRows == 1) { //queremos modificar un registro, así que afectará a 1 fila
+				// conseguimos el ID que acabamos de crear
+				ResultSet rs = pst.getGeneratedKeys();
+				if (rs.next()) {
+					pojo.setId(rs.getInt(1));
+				}
+			}	
+		} 
+		
+		return pojo;
+		
 	}
 	
 		

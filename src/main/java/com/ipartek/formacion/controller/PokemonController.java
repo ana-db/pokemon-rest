@@ -1,8 +1,10 @@
 package com.ipartek.formacion.controller;
 
+import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.ArrayList;
+import java.util.Set;
 
 import javax.servlet.ServletConfig;
 import javax.servlet.ServletException;
@@ -10,12 +12,16 @@ import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import javax.validation.ConstraintViolation;
+import javax.validation.Validator;
+import javax.validation.ValidatorFactory;
 
 import org.apache.log4j.Logger;
 
 import com.google.gson.Gson;
 import com.ipartek.formacion.model.PokemonDAO;
 import com.ipartek.formacion.model.pojo.Pokemon;
+import com.mysql.jdbc.exceptions.MySQLIntegrityConstraintViolationException;
 
 
 
@@ -36,6 +42,10 @@ public class PokemonController extends HttpServlet {
 	private int statusCode;
 	private Object responseBody;
 	private String nombre;
+	
+	//Crear Factoria y Validador
+	ValidatorFactory factory;
+	Validator validator;
 	
 
 	/**
@@ -161,9 +171,6 @@ public class PokemonController extends HttpServlet {
 		
 		}
 		
-		
-	
-		
 	}
 
 	
@@ -171,17 +178,79 @@ public class PokemonController extends HttpServlet {
 	 * @see HttpServlet#doPost(HttpServletRequest request, HttpServletResponse response)
 	 */
 	protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-		// TODO Auto-generated method stub
-		doGet(request, response);
+		
+		doPut(request, response);
 	}
 
+	
 	/**
 	 * @see HttpServlet#doPut(HttpServletRequest, HttpServletResponse)
 	 */
 	protected void doPut(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-		// TODO Auto-generated method stub
+
+		try {
+			
+			//cogemos cogemos el índice del pokemon de la url con la función obtenerId() (tenemos la llamada en service): 
+				
+				// convertir json del request body a Objeto:
+				BufferedReader reader = request.getReader(); //coge los datos del body de postman           
+				Gson gson = new Gson(); //crea un objeto gson
+				Pokemon pokemon = gson.fromJson(reader, Pokemon.class);	//convierte el objeto gson en uno de la clase Pokemon
+				LOG.debug(" Json convertido a Objeto: " + pokemon);
+			
+				//validamos que el objeto esté bien creado:
+				Set<ConstraintViolation<Pokemon>>  validacionesErrores = validator.validate(pokemon);		
+				if ( validacionesErrores.isEmpty() ) {
+					
+					if ( id != -1 ) { //significa que el pokemon sí existe en la bd. Lo editamos según su id
+						
+						LOG.debug("PUT modificar recurso");
+						
+						Pokemon pEditar = dao.update(id, pokemon);
+						
+						//response status code:
+						statusCode = HttpServletResponse.SC_OK;	//200, ok
+						responseBody = pEditar;
+				
+					}else { //id == -1: hemos entrado por doPost, significa que el pokemon no existe en la bd, así que lo creamos
+						
+						LOG.debug("POST crear recurso");
+						
+						Pokemon pNuevo = dao.create(pokemon);
+						
+						//response status code:
+						statusCode = HttpServletResponse.SC_CREATED;	//201, creado 
+						responseBody = pNuevo;
+					}
+					
+				}else {
+					
+					//response status code:			
+					statusCode = HttpServletResponse.SC_BAD_REQUEST;	//400, datos incorrectos para un producto: precio negativo…
+					
+					//enviamos un array de errores para que el usuario tenga una idea de qué datos ha metido mal y por qué:
+					ArrayList<String> errores = new ArrayList<String>();
+					for (ConstraintViolation<Pokemon> error : validacionesErrores) {					 
+						errores.add( error.getPropertyPath() + " " + error.getMessage() );
+					}				
+/*					responseMensaje.setErrores(errores);				
+					responseBody = responseMensaje;
+*/					
+				}
+				
+		} catch (MySQLIntegrityConstraintViolationException e) {
+			// response status code
+//			responseBody = new ResponseMensaje("El nombre del pokemon ya existe en la base de datos, elige otro");			
+			statusCode = HttpServletResponse.SC_CONFLICT;	//409, nombre duplicado en la bd
+		} catch (Exception e) {
+			// response status code
+//			responseBody = new ResponseMensaje(e.getMessage());			
+			statusCode = HttpServletResponse.SC_BAD_REQUEST;	//400, datos incorrectos para un pokemon: peso negativo…
+		} 
+		
 	}
 
+	
 	/**
 	 * @see HttpServlet#doDelete(HttpServletRequest, HttpServletResponse)
 	 */
@@ -209,7 +278,6 @@ public class PokemonController extends HttpServlet {
 
 		}		
 	}
-	
 	
 	
 	
