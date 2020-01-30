@@ -41,6 +41,9 @@ public class PokemonDAO implements IDAO<Pokemon>{
 	
 	private static final String SQL_INSERT = "INSERT INTO `pokemon` (`nombre`) VALUES (?);";
 	
+	private static final String SQL_UPDATE = "UPDATE `pokemon` SET `nombre`=? WHERE `id`=?;";
+
+	
 	
 	private PokemonDAO() {
 		super();
@@ -198,11 +201,25 @@ public class PokemonDAO implements IDAO<Pokemon>{
 	}
 
 	
-	
 	@Override
 	public Pokemon update(int id, Pokemon pojo) throws Exception {
-		// TODO Auto-generated method stub
-		return null;
+
+		try (Connection con = ConnectionManager.getConnection(); PreparedStatement pst = con.prepareStatement(SQL_UPDATE);) {
+
+			pst.setString(1, pojo.getNombre());
+			pst.setInt(2, id);
+			LOG.debug(pst);
+
+			int affetedRows = pst.executeUpdate();
+			if (affetedRows == 1) {
+				pojo.setId(id);
+			} else {
+				throw new Exception ("No se ha encontrado registro para el Pokemon con id = " + id);
+			}
+		}
+		 
+		return pojo;
+		
 	}
 
 	
@@ -213,7 +230,7 @@ public class PokemonDAO implements IDAO<Pokemon>{
 		try (Connection con = ConnectionManager.getConnection(); PreparedStatement pst = con.prepareStatement(SQL_INSERT, Statement.RETURN_GENERATED_KEYS)) {
 			
 			pst.setString(1, pojo.getNombre()); //1er interrogante con el nombre del registro que se quiere modificar; en ese caso, nombre
-			pst.setArray(2, (Array) pojo.getHabilidades().get(1) ); //añadimos habilidad
+//			pst.setArray(2, (Array) pojo.getHabilidades().get(1) ); //añadimos habilidad
 			LOG.debug(pst);
 			
 			int affectedRows = pst.executeUpdate();
