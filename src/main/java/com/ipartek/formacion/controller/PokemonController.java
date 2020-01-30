@@ -34,6 +34,7 @@ public class PokemonController extends HttpServlet {
 	private int id;
 	private int statusCode;
 	private Object responseBody;
+	private String nombre;
 	
 
 	/**
@@ -66,6 +67,9 @@ public class PokemonController extends HttpServlet {
 		pathInfo = request.getPathInfo();
 		LOG.debug("Ver pathInfo:" + pathInfo + " para saber si es listado o detalle" );
 		
+		nombre = request.getParameter("nombre");
+		LOG.debug("Nombre Pokemon a buscar: " + nombre);
+		
 		try {
 			
 			id = obtenerId(pathInfo); //buscamos el valor del índice del producto en la url con la función obtenerId
@@ -96,6 +100,9 @@ public class PokemonController extends HttpServlet {
 	 * @see HttpServlet#doGet(HttpServletRequest request, HttpServletResponse response)
 	 */
 	protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+		
+		LOG.trace("peticion GET");
+		
 		/*
 		// lista de pokemons:
 		ArrayList<Pokemon> pokemons = (ArrayList<Pokemon>) dao.getAll();
@@ -111,36 +118,47 @@ public class PokemonController extends HttpServlet {
 		response.setStatus(200);
 		*/
 		
-		///////////////////////// tenemos que diefenciar entre la lista total y un pokemon en concreto ///////////////////////////////////
-		
-		LOG.trace("peticion GET");
-		
-		//aquí cogemos cogemos el índice del pokemon de la url con la función obtenerId() (tenemos la llamada en service): 
-		if ( id != -1 ) {	//detalle de un pokemon por su id
+		//diferenciamos entre listar o buscar:
+		if( nombre != null) { //buscamos por nombre
 			
-			//recuperamos un pokemon por su id:
-			responseBody = dao.getById(id);
+			responseBody = dao.getByNombre(nombre);
 			
-			//response status code:
-			if ( null != responseBody ) {
-				statusCode = HttpServletResponse.SC_OK;	//200, ok
-			}else {
-				statusCode = HttpServletResponse.SC_NOT_FOUND;	//404, no se encuentra el recurso solicitado
+			if ( ((ArrayList<Pokemon>) responseBody).isEmpty() ) {
+				statusCode = HttpServletResponse.SC_NO_CONTENT;
 			}
 			
-		}else {		//listado de todos los pokemon de la bd
+		}else { //listamos 
+		
+			///////////////////////// tenemos que diefenciar entre la lista total y un pokemon en concreto ///////////////////////////////////
 			
-			//recuperamos la lista de todos los pokemon de la bd:
-			responseBody = (ArrayList<Pokemon>) dao.getAll();
-			
-			//response status code:
-			if (  ((ArrayList<Pokemon>)responseBody).isEmpty()  ) {
-				statusCode = HttpServletResponse.SC_NO_CONTENT;	//204, no hay contenido: encuentra el recurso pero está vacío
-			}else {
-				statusCode = HttpServletResponse.SC_OK;	//200, ok
-			}
-			
-		}			
+			//aquí cogemos cogemos el índice del pokemon de la url con la función obtenerId() (tenemos la llamada en service): 
+			if ( id != -1 ) {	//detalle de un pokemon por su id
+				
+				//recuperamos un pokemon por su id:
+				responseBody = dao.getById(id);
+				
+				//response status code:
+				if ( null != responseBody ) {
+					statusCode = HttpServletResponse.SC_OK;	//200, ok
+				}else {
+					statusCode = HttpServletResponse.SC_NOT_FOUND;	//404, no se encuentra el recurso solicitado
+				}
+				
+			}else {		//listado de todos los pokemon de la bd
+				
+				//recuperamos la lista de todos los pokemon de la bd:
+				responseBody = (ArrayList<Pokemon>) dao.getAll();
+				
+				//response status code:
+				if (  ((ArrayList<Pokemon>)responseBody).isEmpty()  ) {
+					statusCode = HttpServletResponse.SC_NO_CONTENT;	//204, no hay contenido: encuentra el recurso pero está vacío
+				}else {
+					statusCode = HttpServletResponse.SC_OK;	//200, ok
+				}
+				
+			}	
+		
+		}
 		
 		
 	

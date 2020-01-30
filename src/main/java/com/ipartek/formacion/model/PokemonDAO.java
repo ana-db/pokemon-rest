@@ -29,6 +29,11 @@ public class PokemonDAO implements IDAO<Pokemon>{
 												" WHERE p.id = ph.id_pokemon AND ph.id_habilidad = h.id AND p.id= ?" + 
 												" ORDER BY p.id DESC LIMIT 500;";
 	
+	private static final String SQL_GET_BY_NOMBRE = "SELECT p.id 'id_pokemon', p.nombre 'nombre_pokemon', h.id 'id_habilidad', h.nombre 'nombre_habilidad' " + 
+														" FROM pokemon p, pokemon_has_habilidades ph, habilidad h " + 
+														" WHERE p.id = ph.id_pokemon AND ph.id_habilidad = h.id AND p.nombre LIKE ? " + 
+														" ORDER BY p.id DESC LIMIT 500;";
+	
 	
 	private PokemonDAO() {
 		super();
@@ -60,9 +65,9 @@ public class PokemonDAO implements IDAO<Pokemon>{
 				ResultSet rs = pst.executeQuery() ) {
 						
 			while( rs.next() ) {
-				
-				int idPokemon = rs.getInt("id_pokemon");
 /*				
+				int idPokemon = rs.getInt("id_pokemon");
+				
 				Pokemon p = pokemonHM.get(idPokemon);
 				
 				if(p == null) {
@@ -78,8 +83,11 @@ public class PokemonDAO implements IDAO<Pokemon>{
 				p.getHabilidades().add(h); 
 				
 				pokemonHM.put(idPokemon, p);
-*/				
+				
 				pokemonHM.put(idPokemon, mapper(rs, idPokemon, pokemonHM));
+*/
+				mapper(rs, pokemonHM);
+				
 				//registros.add(mapper(rs));
 				
 			}
@@ -106,14 +114,12 @@ public class PokemonDAO implements IDAO<Pokemon>{
 			//sustituimos parámetros en la SQL, en este caso 1º ? por id:
 			pst.setInt(1, id);
 			LOG.debug(pst);
-			
-			p = pokemonHM.get(id);
 
 			//ejecutamos la consulta:
 			try (ResultSet rs = pst.executeQuery()) {
 				while(rs.next()) {
 
-					p = mapper(rs, id, pokemonHM);
+					p = mapper(rs, pokemonHM);
 				}
 			}
 
@@ -123,6 +129,37 @@ public class PokemonDAO implements IDAO<Pokemon>{
 		
 		return p;
 	}
+	
+
+	
+	public List<Pokemon> getByNombre(String nombre) {
+				
+		HashMap<Integer, Pokemon> pokemonHM = new HashMap<Integer, Pokemon>();
+		
+		try (Connection con = ConnectionManager.getConnection();
+				PreparedStatement pst = con.prepareStatement(SQL_GET_BY_NOMBRE);
+				) {
+						
+			//sustituimos parámetros en la SQL, en este caso 1º ? por nombre:
+			pst.setString(1, "%" + nombre + "%");
+			LOG.debug(pst);
+
+			//ejecutamos la consulta:
+			try (ResultSet rs = pst.executeQuery()) {
+				while(rs.next()) {
+
+					mapper(rs, pokemonHM);
+				}
+			}
+
+		} catch (Exception e) {
+			LOG.error(e); 
+		}
+		
+		return new ArrayList<Pokemon>(pokemonHM.values());
+	}	
+	
+	
 
 	@Override
 	public Pokemon delete(int id) throws Exception {
@@ -143,7 +180,9 @@ public class PokemonDAO implements IDAO<Pokemon>{
 	}
 	
 		
-	private Pokemon mapper(ResultSet rs, int idPokemon, HashMap<Integer, Pokemon> pokemonHM) throws SQLException {
+	private Pokemon mapper(ResultSet rs, HashMap<Integer, Pokemon> pokemonHM) throws SQLException {
+		
+		int idPokemon = rs.getInt("id_pokemon");
 
 		Pokemon p = pokemonHM.get(idPokemon);
 		
