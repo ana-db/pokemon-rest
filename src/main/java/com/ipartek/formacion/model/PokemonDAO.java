@@ -138,7 +138,11 @@ public class PokemonDAO implements IDAO<Pokemon>{
 	}
 	
 
-	
+	/**
+	 * Método para devolver todas las coincidencias de objetos Pokemon que coincidan con el parámetro de entrada nombre (parámetro de la url)
+	 * @param nombre , nombre o cadena de caracteres que queremos buscar
+	 * @return ArrayList<Pokemon> , devuelve una lista con todos los pokemon que tengan en su nombre la cadena de acarcteres "nombre"
+	 */
 	public List<Pokemon> getByNombre(String nombre) {
 				
 		HashMap<Integer, Pokemon> pokemonHM = new HashMap<Integer, Pokemon>();
@@ -227,6 +231,13 @@ public class PokemonDAO implements IDAO<Pokemon>{
 	}
 	
 		
+	/**
+	 * Método para mapear un ResultSet y un HashMap a un pojo o a un Pokemon
+	 * @param rs
+	 * @param pokemonHM
+	 * @return un objeto de tipo Pokemon
+	 * @throws SQLException , si no puede rellenar alguno de los atributos del objeto
+	 */
 	private Pokemon mapper(ResultSet rs, HashMap<Integer, Pokemon> pokemonHM) throws SQLException {
 		
 		int idPokemon = rs.getInt("id_pokemon");

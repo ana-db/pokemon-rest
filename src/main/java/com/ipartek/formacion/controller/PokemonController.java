@@ -13,6 +13,7 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.validation.ConstraintViolation;
+import javax.validation.Validation;
 import javax.validation.Validator;
 import javax.validation.ValidatorFactory;
 
@@ -21,6 +22,7 @@ import org.apache.log4j.Logger;
 import com.google.gson.Gson;
 import com.ipartek.formacion.model.PokemonDAO;
 import com.ipartek.formacion.model.pojo.Pokemon;
+import com.ipartek.formacion.model.pojo.ResponseMensaje;
 import com.mysql.jdbc.exceptions.MySQLIntegrityConstraintViolationException;
 
 
@@ -55,6 +57,9 @@ public class PokemonController extends HttpServlet {
 
 		super.init(config);
 		dao = PokemonDAO.getInstance();
+		
+		factory = Validation.buildDefaultValidatorFactory();
+		validator = factory.getValidator();
 	}
 
 	/**
@@ -63,6 +68,9 @@ public class PokemonController extends HttpServlet {
 	public void destroy() {
 		
 		dao = null;
+		
+		factory = null;
+		validator = null;
 	}
 
 	/**
@@ -70,6 +78,7 @@ public class PokemonController extends HttpServlet {
 	 */
 	protected void service(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
 		
+		//preparamos la respuesta indicando qué tipo de dato devuelve, ContentType y charSet:
 		response.setContentType("application/json");
 		response.setCharacterEncoding("utf-8");
 		
@@ -88,6 +97,7 @@ public class PokemonController extends HttpServlet {
 			
 		} catch (Exception e) {
 			statusCode = HttpServletResponse.SC_BAD_REQUEST; //400, error del cliente: solicitud mal formada, sintaxis errónea...
+			responseBody = new ResponseMensaje(e.getMessage());
 			
 		}finally {	
 			
@@ -227,24 +237,25 @@ public class PokemonController extends HttpServlet {
 					
 					//response status code:			
 					statusCode = HttpServletResponse.SC_BAD_REQUEST;	//400, datos incorrectos para un producto: precio negativo…
+					ResponseMensaje responseMensaje = new ResponseMensaje("Los datos de este Pokemon no son correctos, revisalos por favor");
 					
 					//enviamos un array de errores para que el usuario tenga una idea de qué datos ha metido mal y por qué:
 					ArrayList<String> errores = new ArrayList<String>();
 					for (ConstraintViolation<Pokemon> error : validacionesErrores) {					 
 						errores.add( error.getPropertyPath() + " " + error.getMessage() );
 					}				
-/*					responseMensaje.setErrores(errores);				
+					responseMensaje.setErrores(errores);				
 					responseBody = responseMensaje;
-*/					
+					
 				}
 				
 		} catch (MySQLIntegrityConstraintViolationException e) {
 			// response status code
-//			responseBody = new ResponseMensaje("El nombre del pokemon ya existe en la base de datos, elige otro");			
+			responseBody = new ResponseMensaje("El nombre del pokemon ya existe en la base de datos, elige otro por favor");			
 			statusCode = HttpServletResponse.SC_CONFLICT;	//409, nombre duplicado en la bd
 		} catch (Exception e) {
 			// response status code
-//			responseBody = new ResponseMensaje(e.getMessage());			
+			responseBody = new ResponseMensaje(e.getMessage());			
 			statusCode = HttpServletResponse.SC_BAD_REQUEST;	//400, datos incorrectos para un pokemon: peso negativo…
 		} 
 		
@@ -274,13 +285,19 @@ public class PokemonController extends HttpServlet {
 
 				//response status code:
 				statusCode = HttpServletResponse.SC_NOT_FOUND;	//404, no se encuentra el recurso solicitado
+				responseBody = new ResponseMensaje(e.getMessage());
 			}
 
 		}		
 	}
 	
 	
-	
+	/**
+	 * Método auxiliar para obtener el id a partir de la URL 
+	 * @param pathInfo
+	 * @return
+	 * @throws Exception
+	 */
 	public static int obtenerId(String pathInfo) throws Exception {
 		
 		int id = -1;

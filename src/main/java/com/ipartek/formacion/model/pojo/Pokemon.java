@@ -3,13 +3,24 @@ package com.ipartek.formacion.model.pojo;
 import java.util.ArrayList;
 import java.util.List;
 
+import javax.validation.constraints.NotNull;
+import javax.validation.constraints.Size;
+
+import org.hibernate.validator.constraints.NotBlank;
+
 public class Pokemon {
 	
 	//atributos:
 	private int id;
+	
+	@NotNull
+	@NotBlank
+	@Size( min = 2, max = 50 )
 	private String nombre;
+	
 	private List<Habilidad> habilidades;
 	//private Habilidad habilidad;
+	
 	
 	//constructores:
 	public Pokemon() {
