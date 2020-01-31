@@ -230,7 +230,7 @@ public class PokemonDAO implements IDAO<Pokemon>{
 		try (Connection con = ConnectionManager.getConnection(); PreparedStatement pst = con.prepareStatement(SQL_INSERT, Statement.RETURN_GENERATED_KEYS)) {
 			
 			pst.setString(1, pojo.getNombre()); //1er interrogante con el nombre del registro que se quiere modificar; en ese caso, nombre
-//			pst.setArray(2, (Array) pojo.getHabilidades().get(1) ); //añadimos habilidad
+//			pst.setArray(2, (Array) pojo.getHabilidades() ); //añadimos habilidad
 			LOG.debug(pst);
 			
 			int affectedRows = pst.executeUpdate();
@@ -239,6 +239,14 @@ public class PokemonDAO implements IDAO<Pokemon>{
 				ResultSet rs = pst.getGeneratedKeys();
 				if (rs.next()) {
 					pojo.setId(rs.getInt(1));
+					
+					// for por habilidades para ir rellenado la/s habilidades 
+					
+						//tenemos que preparar la consulta con PreparedStatement pst = con.prepareStatement(SQL_INSERT, Statement.RETURN_GENERATED_KEYS)
+						
+						// insert en laq tabla intremedia
+				  		//INSERT INTO `pokemon_has_habilidades` (`id_pokemon`, `id_habilidad`) VALUES ('7', '6');
+					
 				}
 			}	
 		} 
