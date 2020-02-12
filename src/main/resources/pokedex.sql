@@ -46,16 +46,17 @@ CREATE TABLE IF NOT EXISTS `pokemon` (
   `nombre` varchar(50) NOT NULL DEFAULT '0',
   PRIMARY KEY (`id`),
   UNIQUE KEY `nombre` (`nombre`)
-) ENGINE=InnoDB AUTO_INCREMENT=5 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=6 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
--- Volcando datos para la tabla pokedex.pokemon: ~4 rows (aproximadamente)
+-- Volcando datos para la tabla pokedex.pokemon: ~5 rows (aproximadamente)
 DELETE FROM `pokemon`;
 /*!40000 ALTER TABLE `pokemon` DISABLE KEYS */;
 INSERT INTO `pokemon` (`id`, `nombre`) VALUES
 	(4, 'bulbasaur'),
 	(3, 'charmander'),
 	(1, 'lucario'),
-	(2, 'pikachu');
+	(2, 'pikachu'),
+	(5, 'squirtle');
 /*!40000 ALTER TABLE `pokemon` ENABLE KEYS */;
 
 -- Volcando estructura para tabla pokedex.pokemon_has_habilidades
@@ -79,6 +80,7 @@ INSERT INTO `pokemon_has_habilidades` (`id_pokemon`, `id_habilidad`) VALUES
 	(1, 2),
 	(1, 3),
 	(3, 3),
+	(5, 3),
 	(2, 4),
 	(2, 5),
 	(3, 6),
