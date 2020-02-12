@@ -20,6 +20,7 @@ public class Pokemon {
 	
 	private List<Habilidad> habilidades;
 	//private Habilidad habilidad;
+	private String imagen;
 	
 	
 	//constructores:
@@ -29,14 +30,16 @@ public class Pokemon {
 		this.nombre = "";
 		this.habilidades = new ArrayList<Habilidad>();
 		//	this.habilidad = new Habilidad();
+		this.imagen = "";
 	}
 	
-	public Pokemon(int id, String nombre, List<Habilidad> habilidades) { //Habilidad habilidad) { 
+	public Pokemon(int id, String nombre, List<Habilidad> habilidades, String imagen) { //Habilidad habilidad) { 
 		this();
 		this.id = id;
 		this.nombre = nombre;
 		this.habilidades = habilidades;
 		//	this.habilidad = habilidad;
+		this.imagen = imagen;
 	}
 
 	//getters y setters:
@@ -64,9 +67,17 @@ public class Pokemon {
 		this.habilidades = habilidades;
 	}
 
+	public String getImagen() {
+		return imagen;
+	}
+
+	public void setImagen(String imagen) {
+		this.imagen = imagen;
+	}
+
 	@Override
 	public String toString() {
-		return "Pokemon [id=" + id + ", nombre=" + nombre + ", habilidades=" + habilidades + "]";
+		return "Pokemon [id=" + id + ", nombre=" + nombre + ", habilidades=" + habilidades + ", imagen=" + imagen + "]";
 	}
 
 

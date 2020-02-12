@@ -22,26 +22,26 @@ public class PokemonDAO implements IDAO<Pokemon>{
 	
 	private static PokemonDAO INSTANCE;
 	
-	private static final String SQL_GET_ALL = "SELECT p.id 'id_pokemon', p.nombre 'nombre_pokemon', h.id 'id_habilidad', h.nombre 'nombre_habilidad' " + 
+	private static final String SQL_GET_ALL = "SELECT p.id 'id_pokemon', p.nombre 'nombre_pokemon', p.imagen 'imagen_pokemon', h.id 'id_habilidad', h.nombre 'nombre_habilidad' " + 
 												" FROM pokemon p, pokemon_has_habilidades ph, habilidad h " + 
 												" WHERE p.id = ph.id_pokemon AND ph.id_habilidad = h.id " + 
 												" ORDER BY p.id DESC LIMIT 500;";
 	
-	private static final String SQL_GET_BY_ID = "SELECT p.id 'id_pokemon', p.nombre 'nombre_pokemon', h.id 'id_habilidad', h.nombre 'nombre_habilidad' " + 
+	private static final String SQL_GET_BY_ID = "SELECT p.id 'id_pokemon', p.nombre 'nombre_pokemon', p.imagen 'imagen_pokemon', h.id 'id_habilidad', h.nombre 'nombre_habilidad' " + 
 												" FROM pokemon p, pokemon_has_habilidades ph, habilidad h " + 
 												" WHERE p.id = ph.id_pokemon AND ph.id_habilidad = h.id AND p.id= ?" + 
 												" ORDER BY p.id DESC LIMIT 500;";
 	
-	private static final String SQL_GET_BY_NOMBRE = "SELECT p.id 'id_pokemon', p.nombre 'nombre_pokemon', h.id 'id_habilidad', h.nombre 'nombre_habilidad' " + 
+	private static final String SQL_GET_BY_NOMBRE = "SELECT p.id 'id_pokemon', p.nombre 'nombre_pokemon', p.imagen 'imagen_pokemon', h.id 'id_habilidad', h.nombre 'nombre_habilidad' " + 
 														" FROM pokemon p, pokemon_has_habilidades ph, habilidad h " + 
 														" WHERE p.id = ph.id_pokemon AND ph.id_habilidad = h.id AND p.nombre LIKE ? " + 
 														" ORDER BY p.id DESC LIMIT 500;";
 	
 	private static final String SQL_DELETE = "DELETE FROM pokemon WHERE id = ?;";
 	
-	private static final String SQL_INSERT = "INSERT INTO `pokemon` (`nombre`) VALUES (?);";
+	private static final String SQL_INSERT = "INSERT INTO `pokemon` (`nombre`, `imagen`) VALUES (?, ?);";
 	
-	private static final String SQL_UPDATE = "UPDATE `pokemon` SET `nombre`=? WHERE `id`=?;";
+	private static final String SQL_UPDATE = "UPDATE `pokemon` SET `nombre`=?, `imagen`=? WHERE `id`=?;";
 
 	
 	
@@ -207,7 +207,8 @@ public class PokemonDAO implements IDAO<Pokemon>{
 		try (Connection con = ConnectionManager.getConnection(); PreparedStatement pst = con.prepareStatement(SQL_UPDATE);) {
 
 			pst.setString(1, pojo.getNombre());
-			pst.setInt(2, id);
+			pst.setString(2, pojo.getImagen());
+			pst.setInt(3, id);
 			LOG.debug(pst);
 
 			int affetedRows = pst.executeUpdate();
@@ -230,6 +231,7 @@ public class PokemonDAO implements IDAO<Pokemon>{
 		try (Connection con = ConnectionManager.getConnection(); PreparedStatement pst = con.prepareStatement(SQL_INSERT, Statement.RETURN_GENERATED_KEYS)) {
 			
 			pst.setString(1, pojo.getNombre()); //1er interrogante con el nombre del registro que se quiere modificar; en ese caso, nombre
+			pst.setString(2, pojo.getImagen());
 //			pst.setArray(2, (Array) pojo.getHabilidades() ); //añadimos habilidad
 			LOG.debug(pst);
 			
@@ -273,6 +275,7 @@ public class PokemonDAO implements IDAO<Pokemon>{
 			p = new Pokemon();
 			p.setId(idPokemon);
 			p.setNombre(rs.getString("nombre_pokemon"));
+			p.setImagen(rs.getString("imagen_pokemon"));
 		}
 		
 		Habilidad h = new Habilidad();
