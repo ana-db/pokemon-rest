@@ -78,6 +78,11 @@ public class PokemonController extends HttpServlet {
 	 */
 	protected void service(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
 		
+		//habilitar cors (habría que hacerlo en un filtro), para pokemon-cliente-angular
+		response.addHeader("Access-Control-Allow-Origin", "*"); //permiso para todas las ips
+		response.addHeader("Access-Control-Allow-Methods", "GET, POST, DELETE, PUT"); //permiso para todos los métodos
+		response.addHeader("Access-Control-Allow-Headers", "Content-Type");
+		
 		//preparamos la respuesta indicando qué tipo de dato devuelve, ContentType y charSet:
 		response.setContentType("application/json");
 		response.setCharacterEncoding("utf-8");
