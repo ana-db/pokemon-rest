@@ -22,14 +22,27 @@ public class PokemonDAO implements IDAO<Pokemon>{
 	
 	private static PokemonDAO INSTANCE;
 	
+	/*
 	private static final String SQL_GET_ALL = "SELECT p.id 'id_pokemon', p.nombre 'nombre_pokemon', p.imagen 'imagen_pokemon', h.id 'id_habilidad', h.nombre 'nombre_habilidad' " + 
 												" FROM pokemon p, pokemon_has_habilidades ph, habilidad h " + 
 												" WHERE p.id = ph.id_pokemon AND ph.id_habilidad = h.id " + 
 												" ORDER BY p.id DESC LIMIT 500;";
-	
+	*/
+	//necesitamos hacer LEFT JOIN entre tablas pokemon y pokemon_has_habilidades para que al crear un pokemon sin habilidades, podamos verlo al hacer un getAll
+	private static final String SQL_GET_ALL = "SELECT p.id 'id_pokemon', p.nombre 'nombre_pokemon', p.imagen 'imagen_pokemon', h.id 'id_habilidad', h.nombre 'nombre_habilidad' " +
+												" FROM pokemon p LEFT JOIN pokemon_has_habilidades ph ON p.id = ph.id_pokemon " + 
+												" LEFT JOIN habilidad h ON ph.id_habilidad = h.id " + 
+												" ORDER BY p.id DESC LIMIT 500;";
+	/*
 	private static final String SQL_GET_BY_ID = "SELECT p.id 'id_pokemon', p.nombre 'nombre_pokemon', p.imagen 'imagen_pokemon', h.id 'id_habilidad', h.nombre 'nombre_habilidad' " + 
 												" FROM pokemon p, pokemon_has_habilidades ph, habilidad h " + 
 												" WHERE p.id = ph.id_pokemon AND ph.id_habilidad = h.id AND p.id= ?" + 
+												" ORDER BY p.id DESC LIMIT 500;";
+	*/
+	private static final String SQL_GET_BY_ID = "SELECT p.id 'id_pokemon', p.nombre 'nombre_pokemon', p.imagen 'imagen_pokemon', h.id 'id_habilidad', h.nombre 'nombre_habilidad' " +
+												" FROM pokemon p LEFT JOIN pokemon_has_habilidades ph ON p.id = ph.id_pokemon " + 
+												" LEFT JOIN habilidad h ON ph.id_habilidad = h.id " + 
+												" WHERE p.id= ?" + 
 												" ORDER BY p.id DESC LIMIT 500;";
 	
 	private static final String SQL_GET_BY_NOMBRE = "SELECT p.id 'id_pokemon', p.nombre 'nombre_pokemon', p.imagen 'imagen_pokemon', h.id 'id_habilidad', h.nombre 'nombre_habilidad' " + 
