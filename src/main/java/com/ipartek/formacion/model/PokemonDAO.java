@@ -1,6 +1,5 @@
 package com.ipartek.formacion.model;
 
-import java.sql.Array;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -14,6 +13,9 @@ import org.apache.log4j.Logger;
 
 import com.ipartek.formacion.model.pojo.Habilidad;
 import com.ipartek.formacion.model.pojo.Pokemon;
+import com.mysql.jdbc.exceptions.jdbc4.MySQLIntegrityConstraintViolationException;
+
+
 
 
 public class PokemonDAO implements IDAO<Pokemon>{
@@ -56,6 +58,7 @@ public class PokemonDAO implements IDAO<Pokemon>{
 	
 	private static final String SQL_UPDATE = "UPDATE `pokemon` SET `nombre`=?, `imagen`=? WHERE `id`=?;";
 
+	private static final String SQL_INSERT_PhH = "INSERT INTO `pokemon_has_habilidades` (`id_pokemon`, `id_habilidad`) VALUES (?, ?);";
 	
 	
 	private PokemonDAO() {
@@ -241,7 +244,12 @@ public class PokemonDAO implements IDAO<Pokemon>{
 	public Pokemon create(Pokemon pojo) throws Exception {
 
 		//establecemos conexión:
-		try (Connection con = ConnectionManager.getConnection(); PreparedStatement pst = con.prepareStatement(SQL_INSERT, Statement.RETURN_GENERATED_KEYS)) {
+		Connection con = null;
+		try { 
+			con = ConnectionManager.getConnection(); 
+			PreparedStatement pst = con.prepareStatement(SQL_INSERT, Statement.RETURN_GENERATED_KEYS);
+			
+			con.setAutoCommit(false); //no guarda nada en la base de datos
 			
 			pst.setString(1, pojo.getNombre()); //1er interrogante con el nombre del registro que se quiere modificar; en ese caso, nombre
 			pst.setString(2, pojo.getImagen());
@@ -255,16 +263,61 @@ public class PokemonDAO implements IDAO<Pokemon>{
 				if (rs.next()) {
 					pojo.setId(rs.getInt(1));
 					
-					// for por habilidades para ir rellenado la/s habilidades 
+					//nuevo HABILIDADES:
 					
-						//tenemos que preparar la consulta con PreparedStatement pst = con.prepareStatement(SQL_INSERT, Statement.RETURN_GENERATED_KEYS)
+					// 1) for por cada habilidad (si tiene habilidades) para ir rellenado la/s habilidades
+						// 2) tenemos que preparar la consulta con PreparedStatement pst = con.prepareStatement(SQL_INSERT, Statement.RETURN_GENERATED_KEYS)
+						// 3) insert en laq tabla intremedia
+				  			//INSERT INTO `pokemon_has_habilidades` (`id_pokemon`, `id_habilidad`) VALUES ('7', '6');
+							//habilidad.getId();
+					
+					ArrayList<Habilidad> habilidades = (ArrayList<Habilidad>) pojo.getHabilidades();
+					
+					for(Habilidad habilidad : habilidades) {
 						
-						// insert en laq tabla intremedia
-				  		//INSERT INTO `pokemon_has_habilidades` (`id_pokemon`, `id_habilidad`) VALUES ('7', '6');
+						PreparedStatement pst2 = con.prepareStatement(SQL_INSERT_PhH, Statement.RETURN_GENERATED_KEYS);
+						//SQL_INSERT_PhH = "INSERT INTO `pokemon_has_habilidades` (`id_pokemon`, `id_habilidad`) VALUES (?, ?);";
+						pst2.setInt(1, pojo.getId()); //id_pokemon
+						pst2.setInt(2, habilidad.getId()); //id_habilidad
+						LOG.debug(pst2);
+						//
+						int affectedRows2 = pst2.executeUpdate();
+						if (affectedRows2 == 1) { //queremos modificar un registro, así que afectará a 1 fila
+							// conseguimos el ID que acabamos de crear
+							ResultSet rs2 = pst2.getGeneratedKeys();
+							if (rs2.next()) {
+								pojo.setId(rs2.getInt(1));
+								habilidad.setId(rs2.getInt(1));
+							}
+						}//fin if affectedRows2
 					
+					}//fin for
+					
+					// si todo funciona bien:
+					con.commit();
 				}
 			}	
-		} 
+			
+		}catch(MySQLIntegrityConstraintViolationException e) { 
+			//MySQLIntegrityConstraintViolationException --> 400 Bad request --> librería import com.mysql.jdbc.exceptions.jdbc4.MySQLIntegrityConstraintViolationException;
+			con.rollback();
+			String error = e.getMessage();
+			if( error.contains("Duplicate") ) {
+				throw new Exception("El nombre ya existe en la base de datos, elige otro, por favor");
+			}else if( error.contains("Cannot add or update a child row") ){
+				throw new Exception("La habilidad no existe en la base de datos, elige otra por favor");
+			}
+		}catch(Exception e) { 
+			//hacemos rb y throw cada vez que capturemos una excepcion
+			con.rollback();
+			String error = e.getMessage();
+			throw new Exception("Se ha producido un error");
+		}finally{
+			if(con != null) {
+				con.close();
+			}
+		}
+		
 		
 		return pojo;
 		
