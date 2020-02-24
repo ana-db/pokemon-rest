@@ -60,6 +60,9 @@ public class PokemonDAO implements IDAO<Pokemon>{
 
 	private static final String SQL_INSERT_PhH = "INSERT INTO `pokemon_has_habilidades` (`id_pokemon`, `id_habilidad`) VALUES (?, ?);";
 	
+	//gestionando habilidades cuando modificamos el pokemon necesitaremos hacer SQL_DELETE__PhH y SQL_INSERT_PhH:
+	private static final String SQL_DELETE_PhH = "DELETE FROM pokemon_has_habilidades WHERE id_pokemon = ?;";
+	
 	
 	private PokemonDAO() {
 		super();
@@ -219,7 +222,8 @@ public class PokemonDAO implements IDAO<Pokemon>{
 	
 	@Override
 	public Pokemon update(int id, Pokemon pojo) throws Exception {
-
+		
+		/*
 		try (Connection con = ConnectionManager.getConnection(); PreparedStatement pst = con.prepareStatement(SQL_UPDATE);) {
 
 			pst.setString(1, pojo.getNombre());
@@ -232,6 +236,91 @@ public class PokemonDAO implements IDAO<Pokemon>{
 				pojo.setId(id);
 			} else {
 				throw new Exception ("No se ha encontrado registro para el Pokemon con id = " + id);
+			}
+		}
+		 
+		return pojo;
+		*/
+		
+		///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////		
+		//al modificar un pokemon, también queremos modificar sus habilidades:
+		//establecemos conexión:
+		Connection con = null;
+		try {
+				con = ConnectionManager.getConnection(); 
+				PreparedStatement pst = con.prepareStatement(SQL_UPDATE);
+				
+				con.setAutoCommit(false); //no guarda nada en la base de datos
+
+				pst.setString(1, pojo.getNombre());
+				pst.setString(2, pojo.getImagen());
+				pst.setInt(3, id);
+				LOG.debug(pst);
+	
+				int affetedRows = pst.executeUpdate();
+				if (affetedRows == 1) {
+					
+					pojo.setId(id);
+					
+					//nuevo gestionamos HABILIDADES: 1)eliminamos habilidades que tenga el pokemon, 2)insertamos las nuevas
+					ArrayList<Habilidad> habilidades = (ArrayList<Habilidad>) pojo.getHabilidades();
+					
+					//1)eliminamos habilidades:
+					PreparedStatement pst_eliminar_habilidad = con.prepareStatement(SQL_DELETE_PhH);
+					pst_eliminar_habilidad.setInt(1, id); 
+					LOG.debug(pst_eliminar_habilidad);
+					//obtenemos el id antes de eliminarlo:
+					int affectedRows_eliminar_habilidad = pst_eliminar_habilidad.executeUpdate();
+					
+					for(Habilidad habilidad : habilidades) {
+											
+						//2)insertamos nuevas habilidades:
+						PreparedStatement pst_insertar_habilidad = con.prepareStatement(SQL_INSERT_PhH, Statement.RETURN_GENERATED_KEYS);
+						//SQL_INSERT_PhH = "INSERT INTO `pokemon_has_habilidades` (`id_pokemon`, `id_habilidad`) VALUES (?, ?);";
+						pst_insertar_habilidad.setInt(1, pojo.getId()); //id_pokemon
+						pst_insertar_habilidad.setInt(2, habilidad.getId()); //id_habilidad
+						LOG.debug(pst_insertar_habilidad);
+						//
+						int affectedRows2 = pst_insertar_habilidad.executeUpdate();
+						if (affectedRows2 > 0) { //queremos modificar un registro, así que afectará a 1 fila
+							// conseguimos el ID que acabamos de crear
+							ResultSet rs_insertar_habilidad = pst_insertar_habilidad.getGeneratedKeys();
+							if (rs_insertar_habilidad.next()) {
+								pojo.setId(rs_insertar_habilidad.getInt(1));
+								habilidad.setId(rs_insertar_habilidad.getInt(1));
+							}
+						}//fin if affectedRows2
+						
+					
+					}//fin for
+					
+					
+					//3) si todo funciona bien:
+					con.commit();
+					
+				} else {
+					throw new Exception ("No se ha encontrado registro para el Pokemon con id = " + id);
+				}
+				
+		}catch(MySQLIntegrityConstraintViolationException e) { 
+			//MySQLIntegrityConstraintViolationException --> 400 Bad request --> librería import com.mysql.jdbc.exceptions.jdbc4.MySQLIntegrityConstraintViolationException;
+			con.rollback();
+			String error = e.getMessage();
+			if( error.contains("Duplicate") ) {
+				throw new Exception("El nombre ya existe en la base de datos, elige otro, por favor");
+			}else if( error.contains("Cannot add or update a child row") ){
+				throw new Exception("La habilidad no existe en la base de datos, elige otra por favor");
+			}
+			
+		}catch(Exception e) { 
+			//hacemos rb y throw cada vez que capturemos una excepcion
+			con.rollback();
+			String error = e.getMessage();
+			throw new Exception("Se ha producido un error");
+			
+		}finally{
+			if(con != null) {
+				con.close();
 			}
 		}
 		 
@@ -253,7 +342,6 @@ public class PokemonDAO implements IDAO<Pokemon>{
 			
 			pst.setString(1, pojo.getNombre()); //1er interrogante con el nombre del registro que se quiere modificar; en ese caso, nombre
 			pst.setString(2, pojo.getImagen());
-//			pst.setArray(2, (Array) pojo.getHabilidades() ); //añadimos habilidad
 			LOG.debug(pst);
 			
 			int affectedRows = pst.executeUpdate();
