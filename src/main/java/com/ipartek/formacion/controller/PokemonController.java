@@ -53,6 +53,7 @@ public class PokemonController extends HttpServlet {
 	/**
 	 * @see Servlet#init(ServletConfig)
 	 */
+	@Override
 	public void init(ServletConfig config) throws ServletException {
 
 		super.init(config);
@@ -65,6 +66,7 @@ public class PokemonController extends HttpServlet {
 	/**
 	 * @see Servlet#destroy()
 	 */
+	@Override
 	public void destroy() {
 		
 		dao = null;
@@ -76,6 +78,7 @@ public class PokemonController extends HttpServlet {
 	/**
 	 * @see HttpServlet#service(HttpServletRequest request, HttpServletResponse response)
 	 */
+	@Override
 	protected void service(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
 		
 		//habilitar cors (habría que hacerlo en un filtro), para pokemon-cliente-angular

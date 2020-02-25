@@ -2,8 +2,6 @@ package com.ipartek.formacion.model.pojo;
 
 import static org.junit.Assert.*;
 
-import java.util.ArrayList;
-
 import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.Before;

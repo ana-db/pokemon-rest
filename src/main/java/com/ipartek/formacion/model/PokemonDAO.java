@@ -269,7 +269,7 @@ public class PokemonDAO implements IDAO<Pokemon>{
 					PreparedStatement pst_eliminar_habilidad = con.prepareStatement(SQL_DELETE_PhH);
 					pst_eliminar_habilidad.setInt(1, id); 
 					LOG.debug(pst_eliminar_habilidad);
-					//obtenemos el id antes de eliminarlo:
+					
 					int affectedRows_eliminar_habilidad = pst_eliminar_habilidad.executeUpdate();
 					
 					for(Habilidad habilidad : habilidades) {
@@ -399,7 +399,7 @@ public class PokemonDAO implements IDAO<Pokemon>{
 			//hacemos rb y throw cada vez que capturemos una excepcion
 			con.rollback();
 			String error = e.getMessage();
-			throw new Exception("Se ha producido un error");
+			throw new Exception("Se ha producido un error " + error);
 		}finally{
 			if(con != null) {
 				con.close();

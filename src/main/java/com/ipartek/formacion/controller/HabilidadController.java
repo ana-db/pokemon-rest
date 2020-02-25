@@ -39,7 +39,9 @@ public class HabilidadController extends HttpServlet {
 
 	/**
 	 * @see Servlet#init(ServletConfig)
+	 * @throws ServletException
 	 */
+	@Override
 	public void init(ServletConfig config) throws ServletException {
 		super.init(config);
 		dao = HabilidadDAO.getInstance();
@@ -48,6 +50,7 @@ public class HabilidadController extends HttpServlet {
 	/**
 	 * @see Servlet#destroy()
 	 */
+	@Override
 	public void destroy() {
 		dao = null;
 	}
@@ -56,6 +59,7 @@ public class HabilidadController extends HttpServlet {
 	/**
 	 * @see HttpServlet#service(HttpServletRequest request, HttpServletResponse response)
 	 */
+	@Override
 	protected void service(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
 		
 		//habilitar cors (habría que hacerlo en un filtro), para pokemon-cliente-angular
@@ -147,14 +151,14 @@ public class HabilidadController extends HttpServlet {
 	 * @see HttpServlet#doPut(HttpServletRequest, HttpServletResponse)
 	 */
 	protected void doPut(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-		// TODO Auto-generated method stub
+		// TO DO Auto-generated method stub
 	}
 
 	/**
 	 * @see HttpServlet#doDelete(HttpServletRequest, HttpServletResponse)
 	 */
 	protected void doDelete(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-		// TODO Auto-generated method stub
+		// TO DO Auto-generated method stub
 	}
 	
 	
