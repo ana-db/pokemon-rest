@@ -13,8 +13,24 @@
 		username="root"
 		password="" 
 		/>
-</Context>	
--->
+</Context>	-->
+
+
+<!-- Producción 
+<Context>
+	<Resource auth="Container" 
+	    driverClassName="com.mysql.jdbc.Driver"
+		maxActive="100" 
+		maxIdle="30" 
+		maxWait="10000" 
+		name="jdbc/mydb"	 
+		type="javax.sql.DataSource"
+		url="jdbc:mysql://localhost:3306/pokedex_ana" 
+		username="root"
+		password="root" 
+		/>
+</Context> -->
+
 
 <!-- casa -->
 <Context>
@@ -29,4 +45,4 @@
 		username="root"
 		password="root" 
 		/>
-</Context>
+</Context> 
