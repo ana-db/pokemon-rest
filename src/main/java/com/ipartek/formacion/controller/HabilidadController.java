@@ -31,10 +31,10 @@ public class HabilidadController extends HttpServlet {
 	
 	private HabilidadDAO dao;
 	
-	private String pathInfo;
-	private int id;
-	private int statusCode;
-	private Object responseBody;
+	private static String pathInfo;
+	private static int id;
+	private static int statusCode;
+	private static Object responseBody;
       
 
 	/**
