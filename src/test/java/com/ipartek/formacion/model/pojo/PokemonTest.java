@@ -35,10 +35,10 @@ public class PokemonTest {
 		/* comprobamos que al crear un pokemon, su id es 0, su nombre e imagen
 		 * son cadenas de texto vacías y su array de habilidades está vacío
 		*/
-		assertEquals(nuevoPokemon.getId(), 0); 
-		assertEquals(nuevoPokemon.getNombre(), "");
-		assertEquals(nuevoPokemon.getImagen(), "");
-		assertEquals( nuevoPokemon.getHabilidades().size(), 0 );
+		assertEquals( 0, nuevoPokemon.getId() ); 
+		assertEquals( "", nuevoPokemon.getNombre() );
+		assertEquals( "", nuevoPokemon.getImagen() );
+		assertEquals( 0, nuevoPokemon.getHabilidades().size() );
 	}
 
 }
