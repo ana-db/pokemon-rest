@@ -316,7 +316,7 @@ public class PokemonDAO implements IDAO<Pokemon>{
 			//hacemos rb y throw cada vez que capturemos una excepcion
 			con.rollback();
 			String error = e.getMessage();
-			throw new Exception("Se ha producido un error");
+			throw new Exception("Se ha producido un error" + error);
 			
 		}finally{
 			if(con != null) {

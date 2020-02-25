@@ -35,15 +35,15 @@ public class PokemonController extends HttpServlet {
 	
 	private static final long serialVersionUID = 1L;
 	
-	private final static Logger LOG = Logger.getLogger(PokemonController.class);
+	private static final Logger LOG = Logger.getLogger(PokemonController.class);
 	
 	private PokemonDAO dao;
 	
-	private String pathInfo;
-	private int id;
-	private int statusCode;
-	private Object responseBody;
-	private String nombre;
+	private static String pathInfo;
+	private static int id;
+	private static int statusCode;
+	private static Object responseBody;
+	private static String nombre;
 	
 	//Crear Factoria y Validador
 	ValidatorFactory factory;
